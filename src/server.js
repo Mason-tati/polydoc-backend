@@ -1,34 +1,54 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const authRoutes = require('./routes/authRoutes');
-const documentRoutes = require('./routes/documentRoutes');
-const errorHandler = require('./middleware/errorHandler');
+require("dotenv").config();
+
+const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
+
+const documentRoutes = require("./routes/document.routes");
+const translationRoutes = require("./routes/translation.routes");
 
 const app = express();
-const port = process.env.PORT || 3000;
 
 app.use(helmet());
-app.use(cors({ origin: process.env.FRONTEND_URL || '*', credentials: true }));
-app.use(express.json({ limit: '2mb' }));
+app.use(cors());
+app.use(express.json({ limit: "2mb" }));
+app.use(morgan("combined"));
 
-app.get('/', (req, res) => {
+app.get("/", (_req, res) => {
   res.json({
-    name: 'TranslateManual.ai Backend',
-    status: 'online',
-    version: '1.0.0',
+    name: "TranslateManual.ai Backend",
+    status: "online",
+    version: "1.2.0"
   });
 });
 
-app.get('/health', (req, res) => {
-  res.json({ ok: true, timestamp: new Date().toISOString() });
+app.get("/health", (_req, res) => {
+  res.json({
+    status: "ok",
+    service: "TranslateManual.ai Backend",
+    phase: "2B"
+  });
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/documents', documentRoutes);
-app.use(errorHandler);
+app.use("/api/documents", documentRoutes);
+app.use("/api/translations", translationRoutes);
 
-app.listen(port, () => {
-  console.log(`TranslateManual.ai backend running on port ${port}`);
+app.use((err, _req, res, _next) => {
+  console.error(err);
+
+  if (err.code === "LIMIT_FILE_SIZE") {
+    return res.status(413).json({ error: "File too large." });
+  }
+
+  res.status(500).json({
+    error: "Internal server error",
+    message: process.env.NODE_ENV === "production" ? undefined : err.message
+  });
+});
+
+const PORT = process.env.PORT || 8080;
+
+app.listen(PORT, () => {
+  console.log(`TranslateManual.ai backend running on port ${PORT}`);
 });

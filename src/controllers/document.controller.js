@@ -78,7 +78,10 @@ async function listDocuments(_req, res, next) {
         sizeBytes: true,
         status: true,
         createdAt: true,
-        updatedAt: true
+        updatedAt: true,
+        _count: {
+          select: { translations: true }
+        }
       }
     });
 

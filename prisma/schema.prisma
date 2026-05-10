@@ -7,44 +7,75 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  OWNER
-  ADMIN
-  EDITOR
-  VIEWER
-}
-
 enum DocumentStatus {
   UPLOADED
-  PROCESSING
+  EXTRACTED
+  EXTRACTION_FAILED
+  TRANSLATION_PENDING
+  TRANSLATING
   TRANSLATED
   FAILED
 }
 
+enum TranslationStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String?
-  role         Role     @default(OWNER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  documents    Document[]
+  id        String     @id @default(cuid())
+  email     String     @unique
+  password  String
+  name      String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  documents Document[]
 }
 
 model Document {
-  id              String         @id @default(cuid())
-  ownerId         String
-  owner           User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  originalName    String
-  mimeType        String
-  sourceLanguage  String         @default("auto")
-  targetLanguage  String         @default("English")
-  sourceText      String?
-  translatedText  String?
-  summary         String?
-  status          DocumentStatus @default(UPLOADED)
-  errorMessage    String?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id             String         @id @default(cuid())
+  userId         String?
+  originalName   String
+  storedName     String
+  mimeType       String
+  sizeBytes      Int
+  storagePath    String
+  extractedPath  String?
+  extractedText  String?
+  sourceLanguage String?
+  targetLanguage String?
+  status         DocumentStatus @default(UPLOADED)
+  errorMessage   String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  translations Translation[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Translation {
+  id               String            @id @default(cuid())
+  documentId       String
+  sourceLanguage   String            @default("auto")
+  targetLanguage   String
+  model            String?
+  status           TranslationStatus @default(PENDING)
+  originalChars    Int               @default(0)
+  translatedChars  Int               @default(0)
+  translatedText   String?
+  translatedPath   String?
+  errorMessage     String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@index([status])
+  @@index([createdAt])
 }
