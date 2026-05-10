@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  TRANSLATED
+  FAILED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         Role     @default(OWNER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  documents    Document[]
+}
+
+model Document {
+  id              String         @id @default(cuid())
+  ownerId         String
+  owner           User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  originalName    String
+  mimeType        String
+  sourceLanguage  String         @default("auto")
+  targetLanguage  String         @default("English")
+  sourceText      String?
+  translatedText  String?
+  summary         String?
+  status          DocumentStatus @default(UPLOADED)
+  errorMessage    String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
