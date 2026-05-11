@@ -68,11 +68,17 @@ async function uploadDocument(req, res, next) {
   }
 }
 
-async function listDocuments(_req, res, next) {
+async function listDocuments(req, res, next) {
   try {
     const documents = await prisma.document.findMany({
-      where: req.user ? { userId: req.user.id } : undefined,
-      orderBy: { createdAt: "desc" },
+      where: req.user
+        ? { userId: req.user.id }
+        : undefined,
+
+      orderBy: {
+        createdAt: "desc"
+      },
+
       select: {
         id: true,
         originalName: true,
@@ -81,13 +87,19 @@ async function listDocuments(_req, res, next) {
         status: true,
         createdAt: true,
         updatedAt: true,
+
         _count: {
-          select: { translations: true }
+          select: {
+            translations: true
+          }
         }
       }
     });
 
-    res.json({ documents });
+    res.json({
+      documents
+    });
+
   } catch (error) {
     next(error);
   }
