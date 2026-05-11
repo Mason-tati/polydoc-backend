@@ -7,6 +7,7 @@ const morgan = require("morgan");
 
 const documentRoutes = require("./routes/document.routes");
 const translationRoutes = require("./routes/translation.routes");
+const exportRoutes = require("./routes/export.routes");
 
 const app = express();
 
@@ -19,7 +20,7 @@ app.get("/", (_req, res) => {
   res.json({
     name: "TranslateManual.ai Backend",
     status: "online",
-    version: "1.2.0"
+    version: "1.3.0"
   });
 });
 
@@ -27,12 +28,13 @@ app.get("/health", (_req, res) => {
   res.json({
     status: "ok",
     service: "TranslateManual.ai Backend",
-    phase: "2B"
+    phase: "4A"
   });
 });
 
 app.use("/api/documents", documentRoutes);
 app.use("/api/translations", translationRoutes);
+app.use("/api/exports", exportRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);
