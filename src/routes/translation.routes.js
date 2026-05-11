@@ -1,4 +1,5 @@
 const express = require("express");
+const { requireAuth } = require("../middleware/auth");
 const {
   translateDocument,
   listTranslations,
@@ -8,9 +9,9 @@ const {
 
 const router = express.Router();
 
-router.post("/documents/:id/translate", translateDocument);
-router.get("/", listTranslations);
-router.get("/:id", getTranslation);
-router.get("/:id/download", downloadTranslation);
+router.post("/documents/:id/translate", requireAuth, translateDocument);
+router.get("/", requireAuth, listTranslations);
+router.get("/:id", requireAuth, getTranslation);
+router.get("/:id/download", requireAuth, downloadTranslation);
 
 module.exports = router;

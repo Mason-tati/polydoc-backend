@@ -6,6 +6,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 
 const documentRoutes = require("./routes/document.routes");
+const authRoutes = require("./routes/auth.routes");
 const translationRoutes = require("./routes/translation.routes");
 const exportRoutes = require("./routes/export.routes");
 
@@ -20,7 +21,7 @@ app.get("/", (_req, res) => {
   res.json({
     name: "TranslateManual.ai Backend",
     status: "online",
-    version: "1.4.0"
+    version: "1.5.0"
   });
 });
 
@@ -28,10 +29,11 @@ app.get("/health", (_req, res) => {
   res.json({
     status: "ok",
     service: "TranslateManual.ai Backend",
-    phase: "4B"
+    phase: "5A"
   });
 });
 
+app.use("/api/auth", authRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/translations", translationRoutes);
 app.use("/api/exports", exportRoutes);

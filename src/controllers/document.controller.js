@@ -9,6 +9,7 @@ async function uploadDocument(req, res, next) {
 
     const doc = await prisma.document.create({
       data: {
+        userId: req.user?.id || null,
         originalName: req.file.originalname,
         storedName: req.file.filename,
         mimeType: req.file.mimetype,
@@ -70,6 +71,7 @@ async function uploadDocument(req, res, next) {
 async function listDocuments(_req, res, next) {
   try {
     const documents = await prisma.document.findMany({
+      where: req.user ? { userId: req.user.id } : undefined,
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -96,6 +98,10 @@ async function getDocument(req, res, next) {
     const document = await prisma.document.findUnique({
       where: { id: req.params.id }
     });
+
+    if (document && req.user && document.userId && document.userId !== req.user.id) {
+      return res.status(403).json({ error: "You do not have access to this document." });
+    }
 
     if (!document) {
       return res.status(404).json({ error: "Document not found." });

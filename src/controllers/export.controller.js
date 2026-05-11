@@ -17,6 +17,7 @@ async function downloadTranslationDocx(req, res, next) {
         document: {
           select: {
             originalName: true,
+            userId: true,
           },
         },
       },
@@ -24,6 +25,10 @@ async function downloadTranslationDocx(req, res, next) {
 
     if (!translation) {
       return res.status(404).json({ error: "Translation not found." });
+    }
+
+    if (req.user && translation.document.userId && translation.document.userId !== req.user.id) {
+      return res.status(403).json({ error: "You do not have access to this translation." });
     }
 
     if (translation.status !== "COMPLETED" || !translation.translatedText) {

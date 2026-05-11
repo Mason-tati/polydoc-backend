@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AccountRole {
+  USER
+  ADMIN
+}
+
 enum DocumentStatus {
   UPLOADED
   EXTRACTED
@@ -29,6 +34,7 @@ model User {
   email     String     @unique
   password  String
   name      String?
+  role      AccountRole @default(USER)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   documents Document[]

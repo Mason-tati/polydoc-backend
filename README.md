@@ -1,28 +1,60 @@
-# TranslateManual.ai Backend - Phase 4B PDF Export
+# TranslateManual.ai Backend — Phase 5A Authentication
 
-Phase 4B adds downloadable translated PDF export for completed translations.
+Phase 5A adds user accounts, JWT login, and protected document/translation APIs.
 
-## Endpoints
+## New Auth APIs
 
-GET `/api/exports/translations/:id/docx`
+POST `/api/auth/register`
 
-GET `/api/exports/translations/:id/pdf`
-
-## Test in browser
-
-Replace `TRANSLATION_ID` with a completed translation ID:
-
-```text
-https://polydoc-backend-production.up.railway.app/api/exports/translations/TRANSLATION_ID/pdf
+```json
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "name": "Mason"
+}
 ```
 
-## Notes
+POST `/api/auth/login`
 
-This is professional MVP PDF export. It creates a clean translated PDF with headings, bullets, paragraphs, title, and footer. It does not yet perfectly preserve original PDF layout, images, or tables. That comes later in the advanced layout-preservation engine.
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+GET `/api/auth/me`
+
+Header:
+
+```text
+Authorization: Bearer TOKEN
+```
+
+## Protected APIs
+
+These now require the Bearer token:
+
+- POST `/api/documents/upload`
+- GET `/api/documents`
+- GET `/api/documents/:id`
+- POST `/api/translations/documents/:id/translate`
+- GET `/api/translations`
+- GET `/api/translations/:id`
+- GET `/api/exports/translations/:id/docx`
+- GET `/api/exports/translations/:id/pdf`
+
+## Railway Variables
+
+Make sure this exists:
+
+```env
+JWT_SECRET=your-long-random-secret
+```
 
 ## Deploy
 
-1. Copy these files into `polydoc-backend`
-2. Commit: `Add Phase 4B PDF export`
+1. Copy files into `polydoc-backend`
+2. Commit: `Add Phase 5A authentication`
 3. Push origin
 4. Railway redeploys backend

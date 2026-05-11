@@ -24,6 +24,10 @@ async function translateDocument(req, res, next) {
       return res.status(404).json({ error: "Document not found." });
     }
 
+    if (req.user && document.userId && document.userId !== req.user.id) {
+      return res.status(403).json({ error: "You do not have access to this document." });
+    }
+
     if (!document.extractedText) {
       return res.status(422).json({
         error: "Document has no extracted text. Upload/extract must succeed before translation."
@@ -135,7 +139,10 @@ async function listTranslations(req, res, next) {
     const { documentId } = req.query;
 
     const translations = await prisma.translation.findMany({
-      where: documentId ? { documentId } : undefined,
+      where: {
+        ...(documentId ? { documentId } : {}),
+        ...(req.user ? { document: { userId: req.user.id } } : {}),
+      },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -168,7 +175,8 @@ async function getTranslation(req, res, next) {
             id: true,
             originalName: true,
             mimeType: true,
-            status: true
+            status: true,
+            userId: true
           }
         }
       }
@@ -176,6 +184,10 @@ async function getTranslation(req, res, next) {
 
     if (!translation) {
       return res.status(404).json({ error: "Translation not found." });
+    }
+
+    if (req.user && translation.document && translation.document.userId && translation.document.userId !== req.user.id) {
+      return res.status(403).json({ error: "You do not have access to this translation." });
     }
 
     res.json({
