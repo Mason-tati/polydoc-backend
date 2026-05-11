@@ -1,29 +1,20 @@
-# TranslateManual.ai Backend — Phase 5A Authentication
+# TranslateManual.ai Backend — Phase 5B Teams + Stripe Billing
 
-Phase 5A adds user accounts, JWT login, and protected document/translation APIs.
+Phase 5B adds:
 
-## New Auth APIs
+- Team records
+- Team owner/member structure
+- Stripe customer creation
+- Stripe subscription Checkout
+- Stripe Billing Portal
+- Stripe webhooks to update subscription status
+- Free/pro/business plan tracking
 
-POST `/api/auth/register`
+## New APIs
 
-```json
-{
-  "email": "user@example.com",
-  "password": "password123",
-  "name": "Mason"
-}
-```
+### Get current team
 
-POST `/api/auth/login`
-
-```json
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
-
-GET `/api/auth/me`
+GET `/api/teams/me`
 
 Header:
 
@@ -31,30 +22,98 @@ Header:
 Authorization: Bearer TOKEN
 ```
 
-## Protected APIs
+### Rename team
 
-These now require the Bearer token:
+PATCH `/api/teams/me`
 
-- POST `/api/documents/upload`
-- GET `/api/documents`
-- GET `/api/documents/:id`
-- POST `/api/translations/documents/:id/translate`
-- GET `/api/translations`
-- GET `/api/translations/:id`
-- GET `/api/exports/translations/:id/docx`
-- GET `/api/exports/translations/:id/pdf`
+```json
+{
+  "name": "My Company"
+}
+```
 
-## Railway Variables
+### Create Stripe Checkout session
 
-Make sure this exists:
+POST `/api/billing/checkout`
+
+```json
+{
+  "plan": "pro"
+}
+```
+
+or
+
+```json
+{
+  "plan": "business"
+}
+```
+
+Response:
+
+```json
+{
+  "url": "https://checkout.stripe.com/..."
+}
+```
+
+### Create Billing Portal session
+
+POST `/api/billing/portal`
+
+Response:
+
+```json
+{
+  "url": "https://billing.stripe.com/..."
+}
+```
+
+### Stripe webhook
+
+POST `/api/billing/webhook`
+
+## Required Railway backend variables
 
 ```env
-JWT_SECRET=your-long-random-secret
+STRIPE_SECRET_KEY=sk_test_or_live_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+STRIPE_PRICE_PRO=price_xxx
+STRIPE_PRICE_BUSINESS=price_xxx
+FRONTEND_URL=https://translatemanual-frontend-production.up.railway.app
 ```
+
+Keep existing:
+
+```env
+DATABASE_URL=...
+JWT_SECRET=...
+OPENAI_API_KEY=...
+NODE_ENV=production
+```
+
+## Stripe Dashboard setup
+
+1. Create Stripe account
+2. Create Product: TranslateManual.ai Pro
+3. Create recurring monthly Price
+4. Copy Price ID to `STRIPE_PRICE_PRO`
+5. Create Product: TranslateManual.ai Business
+6. Create recurring monthly Price
+7. Copy Price ID to `STRIPE_PRICE_BUSINESS`
+8. Add webhook endpoint:
+   `https://polydoc-backend-production.up.railway.app/api/billing/webhook`
+9. Listen for:
+   - `checkout.session.completed`
+   - `customer.subscription.created`
+   - `customer.subscription.updated`
+   - `customer.subscription.deleted`
+10. Copy webhook signing secret to `STRIPE_WEBHOOK_SECRET`
 
 ## Deploy
 
-1. Copy files into `polydoc-backend`
-2. Commit: `Add Phase 5A authentication`
+1. Copy into `polydoc-backend`
+2. Commit: `Add Phase 5B teams and Stripe billing`
 3. Push origin
 4. Railway redeploys backend

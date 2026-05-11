@@ -1,4 +1,5 @@
 const prisma = require("../db");
+const { ensureDefaultTeamForUser } = require("../services/team.service");
 const {
   hashPassword,
   comparePassword,
@@ -38,6 +39,8 @@ async function register(req, res, next) {
         role: "USER",
       },
     });
+
+    await ensureDefaultTeamForUser(user);
 
     const token = signToken(user);
 

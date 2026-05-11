@@ -7,6 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum SubscriptionStatus {
+  FREE
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
 enum AccountRole {
   USER
   ADMIN
@@ -35,6 +50,8 @@ model User {
   password  String
   name      String?
   role      AccountRole @default(USER)
+  stripeCustomerId String?
+  teamMemberships TeamMember[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   documents Document[]
@@ -84,4 +101,39 @@ model Translation {
   @@index([documentId])
   @@index([status])
   @@index([createdAt])
+}
+
+
+model Team {
+  id                   String             @id @default(cuid())
+  name                 String
+  ownerId              String
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  stripePriceId        String?
+  subscriptionStatus   SubscriptionStatus @default(FREE)
+  plan                 String             @default("free")
+  monthlyDocumentLimit Int                @default(5)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  members TeamMember[]
+
+  @@index([ownerId])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  role      TeamRole @default(MEMBER)
+  createdAt DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
 }
