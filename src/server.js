@@ -20,7 +20,7 @@ app.get("/", (_req, res) => {
   res.json({
     name: "TranslateManual.ai Backend",
     status: "online",
-    version: "1.3.0"
+    version: "1.4.0"
   });
 });
 
@@ -28,7 +28,7 @@ app.get("/health", (_req, res) => {
   res.json({
     status: "ok",
     service: "TranslateManual.ai Backend",
-    phase: "4A"
+    phase: "4B"
   });
 });
 

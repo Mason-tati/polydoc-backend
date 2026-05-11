@@ -1,25 +1,28 @@
-# TranslateManual.ai Backend — Phase 4A DOCX Export
+# TranslateManual.ai Backend - Phase 4B PDF Export
 
-Phase 4A adds downloadable Word document export for completed translations.
+Phase 4B adds downloadable translated PDF export for completed translations.
 
-## New endpoint
+## Endpoints
 
 GET `/api/exports/translations/:id/docx`
 
-## Flow
+GET `/api/exports/translations/:id/pdf`
 
-1. Upload document
-2. Translate document
-3. Copy translation ID
-4. Download DOCX:
+## Test in browser
+
+Replace `TRANSLATION_ID` with a completed translation ID:
 
 ```text
-https://polydoc-backend-production.up.railway.app/api/exports/translations/TRANSLATION_ID/docx
+https://polydoc-backend-production.up.railway.app/api/exports/translations/TRANSLATION_ID/pdf
 ```
+
+## Notes
+
+This is professional MVP PDF export. It creates a clean translated PDF with headings, bullets, paragraphs, title, and footer. It does not yet perfectly preserve original PDF layout, images, or tables. That comes later in the advanced layout-preservation engine.
 
 ## Deploy
 
 1. Copy these files into `polydoc-backend`
-2. Commit: `Add Phase 4A DOCX export`
+2. Commit: `Add Phase 4B PDF export`
 3. Push origin
 4. Railway redeploys backend
